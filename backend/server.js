@@ -319,6 +319,36 @@ app.get('/generar-reporte/:sesionId', async (req, res) => {
     }
 });
 
+// Obtener sesiones de un paciente específico
+app.get('/sesiones/:pacienteId/paciente', (req, res) => {
+    try {
+        const { pacienteId } = req.params;
+        const sesiones = leerDatos(sesionesFile);
+        const terapeutas = leerDatos(terapeutasFile);
+        
+        // Filtrar sesiones del paciente e incluir información del terapeuta
+        const sesionesPaciente = sesiones
+            .filter(sesion => sesion.pacienteId === pacienteId)
+            .map(sesion => {
+                const terapeuta = terapeutas.find(t => t.id === sesion.terapeutaId);
+                return {
+                    ...sesion,
+                    terapeuta: terapeuta ? {
+                        nombre: terapeuta.nombre,
+                        apellido: terapeuta.apellido
+                    } : null
+                };
+            })
+            .sort((a, b) => new Date(b.fechaCreacion) - new Date(a.fechaCreacion));
+            
+        res.json(sesionesPaciente);
+        
+    } catch (error) {
+        console.error('Error obteniendo sesiones del paciente:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});
+
 app.listen(port, () => {
     console.log(`Servidor corriendo en http://localhost:${port}`);
 });

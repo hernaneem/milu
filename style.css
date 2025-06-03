@@ -149,3 +149,119 @@ button:disabled {
         padding: 4px 8px !important;
     }
 }
+
+/* Indicadores de estado */
+.estado-activa {
+    background-color: #28a745 !important;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 15px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.estado-completada {
+    background-color: #6c757d !important;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 15px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+/* Mejorar apariencia de modales */
+.modal-content {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 80%;
+    max-height: 80%;
+    overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+/* Transcripciones */
+.transcripcion-item {
+    margin-bottom: 15px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #007bff;
+    transition: background-color 0.2s ease;
+}
+
+.transcripcion-item:hover {
+    background-color: #e9ecef;
+}
+
+.transcripcion-timestamp {
+    color: #6c757d;
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.transcripcion-texto {
+    line-height: 1.5;
+    color: #333;
+}
+
+/* Mejorar información de sesiones */
+.sesion-card {
+    transition: all 0.3s ease;
+    border: 1px solid #dee2e6;
+}
+
+.sesion-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+
+/* Botones responsivos */
+@media (max-width: 768px) {
+    .sesion-card {
+        padding: 10px !important;
+    }
+    
+    .sesion-card button {
+        font-size: 10px !important;
+        padding: 4px 6px !important;
+    }
+    
+    .modal-content {
+        max-width: 95%;
+        padding: 20px;
+    }
+}
+
+/* Indicador de carga */
+.loading {
+    text-align: center;
+    padding: 20px;
+    color: #6c757d;
+}
+
+.loading:before {
+    content: "⏳ ";
+    font-size: 16px;
+}
+
+/* Mensaje de éxito */
+.success-message {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+    padding: 12px;
+    border-radius: 4px;
+    margin: 10px 0;
+}
+
+/* Mensaje de error */
+.error-message {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+    padding: 12px;
+    border-radius: 4px;
+    margin: 10px 0;
+}

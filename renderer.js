@@ -226,6 +226,7 @@ async function loginPaciente() {
             document.getElementById('bienvenidaPaciente').textContent = 
                 `Bienvenido, ${result.usuario.nombre} ${result.usuario.apellido}`;
             mostrarPantalla('dashboardPaciente');
+            await cargarDatosPaciente();
             
         } else {
             document.getElementById('errorLoginPaciente').textContent = result.error;
@@ -309,7 +310,7 @@ async function cargarSesionesTerapeuta() {
                             <button class="primary" onclick="abrirSesion('${s.id}')" style="font-size: 12px; padding: 5px 10px;">
                                 Abrir Sesión
                             </button>
-                            <button class="success" onclick="descargarReporte('${s.id}', '${s.nombre}', event)" style="font-size: 12px; padding: 5px 10px;">
+                            <button class="success" onclick="descargarReporte('${s.id}', '${s.nombre}')" style="font-size: 12px; padding: 5px 10px;">
                                 📄 Descargar PDF
                             </button>
                         </div>
@@ -548,51 +549,210 @@ async function finalizarSesion() {
 }
 
 // Descargar reporte PDF
-async function descargarReporte(sesionId, nombreSesion, event) {
+async function descargarReporte(sesionId, nombreSesion) {
     try {
-        // Mostrar indicador de carga
-        const button = event.target;
-        const textoOriginal = button.innerHTML;
-        button.innerHTML = '⏳ Generando...';
-        button.disabled = true;
+        console.log('Descargando reporte para sesión:', sesionId);
         
         const response = await fetch(`http://localhost:3001/generar-reporte/${sesionId}`);
+        console.log('Respuesta del servidor:', response.status, response.ok);
         
         if (response.ok) {
             // Crear blob del PDF
             const blob = await response.blob();
+            console.log('Blob creado:', blob.size, 'bytes');
             
             // Crear enlace de descarga
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.style.display = 'none';
             a.href = url;
             a.download = `reporte-${nombreSesion.replace(/\s+/g, '-')}.pdf`;
             
-            // Agregar al DOM, hacer clic y remover
+            // Forzar descarga
             document.body.appendChild(a);
             a.click();
-            window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
             
-            // Mostrar mensaje de éxito
-            alert('Reporte descargado exitosamente!');
+            // Limpiar URL
+            setTimeout(() => window.URL.revokeObjectURL(url), 100);
+            
+            console.log('Descarga iniciada');
             
         } else {
-            alert('Error al generar el reporte');
+            const errorText = await response.text();
+            console.error('Error del servidor:', errorText);
+            alert('Error al generar el reporte: ' + response.status);
         }
         
-        // Restaurar botón
-        button.innerHTML = textoOriginal;
-        button.disabled = false;
+    } catch (error) {
+        console.error('Error completo:', error);
+        alert('Error de conexión: ' + error.message);
+    }
+}
+
+// Cargar datos del paciente
+async function cargarDatosPaciente() {
+    if (!usuarioActual || usuarioActual.tipo !== 'paciente') return;
+    
+    await cargarInformacionPaciente();
+    await cargarSesionesPaciente();
+}
+
+// Cargar información personal del paciente
+async function cargarInformacionPaciente() {
+    try {
+        const paciente = usuarioActual.usuario;
+        
+        document.getElementById('infoPaciente').innerHTML = `
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <strong>Nombre:</strong> ${paciente.nombre} ${paciente.apellido}<br>
+                    <strong>Email:</strong> ${paciente.correo}<br>
+                    <strong>Teléfono:</strong> ${paciente.telefono}
+                </div>
+                <div>
+                    <strong>Edad:</strong> ${paciente.edad} años<br>
+                    <strong>Género:</strong> ${paciente.genero}<br>
+                    <strong>Registrado:</strong> ${new Date(paciente.fechaRegistro).toLocaleDateString()}
+                </div>
+            </div>
+        `;
+        
+    } catch (error) {
+        console.error('Error cargando información del paciente:', error);
+        document.getElementById('infoPaciente').innerHTML = '<p>Error cargando información</p>';
+    }
+}
+
+// Cargar sesiones del paciente
+async function cargarSesionesPaciente() {
+    try {
+        const response = await fetch(`http://localhost:3001/sesiones/${usuarioActual.usuario.id}/paciente`);
+        const sesiones = await response.json();
+        
+        const sesionesPaciente = document.getElementById('sesionesPaciente');
+        if (sesiones.length === 0) {
+            sesionesPaciente.innerHTML = '<p>Aún no tienes sesiones de terapia registradas.</p>';
+        } else {
+            sesionesPaciente.innerHTML = sesiones.map(s => 
+                `<div style="padding: 15px; border: 1px solid #ddd; margin: 10px 0; border-radius: 8px; background-color: #f9f9f9;">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div>
+                            <strong style="font-size: 16px;">${s.nombre}</strong>
+                            <span style="background-color: ${s.estado === 'activa' ? '#28a745' : '#6c757d'}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 10px;">
+                                ${s.estado}
+                            </span><br>
+                            <small style="color: #666;">Fecha: ${new Date(s.fechaCreacion).toLocaleDateString()}</small><br>
+                            <small style="color: #666;">Transcripciones: ${s.transcripciones.length}</small><br>
+                            <small style="color: #666;">Terapeuta: ${s.terapeuta ? s.terapeuta.nombre + ' ' + s.terapeuta.apellido : 'No disponible'}</small>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 5px;">
+                            <button class="primary" onclick="verTranscripcionesPaciente('${s.id}', '${s.nombre}')" style="font-size: 12px; padding: 5px 10px;">
+                                👁️ Ver Sesión
+                            </button>
+                            <button class="success" onclick="descargarReportePaciente('${s.id}', '${s.nombre}')" style="font-size: 12px; padding: 5px 10px;">
+                                📄 Descargar
+                            </button>
+                        </div>
+                    </div>
+                </div>`
+            ).join('');
+        }
+        
+    } catch (error) {
+        console.error('Error cargando sesiones del paciente:', error);
+        document.getElementById('sesionesPaciente').innerHTML = '<p>Error cargando sesiones</p>';
+    }
+}
+
+// Ver transcripciones de una sesión (para paciente)
+async function verTranscripcionesPaciente(sesionId, nombreSesion) {
+    try {
+        const response = await fetch(`http://localhost:3001/sesion/${sesionId}`);
+        const sesion = await response.json();
+        
+        if (response.ok) {
+            let contenido = `
+                <h3 style="color: #333; margin-bottom: 20px;">📋 ${nombreSesion}</h3>
+                <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <p><strong>📅 Fecha:</strong> ${new Date(sesion.fechaCreacion).toLocaleDateString()}</p>
+                    <p><strong>📊 Estado:</strong> <span class="estado-${sesion.estado}">${sesion.estado}</span></p>
+                    <p><strong>💬 Total de transcripciones:</strong> ${sesion.transcripciones.length}</p>
+                </div>
+                <hr style="margin: 20px 0;">
+                <h4 style="color: #495057; margin-bottom: 15px;">💭 Transcripciones de la sesión:</h4>
+            `;
+            
+            if (sesion.transcripciones.length === 0) {
+                contenido += '<div class="loading">No hay transcripciones en esta sesión</div>';
+            } else {
+                contenido += sesion.transcripciones.map((t, index) => 
+                    `<div class="transcripcion-item">
+                        <div class="transcripcion-timestamp">
+                            🕐 ${new Date(t.timestamp).toLocaleString()} (Fragmento ${index + 1})
+                        </div>
+                        <div class="transcripcion-texto">${t.texto}</div>
+                    </div>`
+                ).join('');
+            }
+            
+            contenido += `
+                <div style="margin-top: 30px; text-align: center;">
+                    <button class="primary" onclick="descargarReportePaciente('${sesionId}', '${nombreSesion}')" style="margin-right: 10px;">
+                        📄 Descargar PDF
+                    </button>
+                    <button class="secondary" onclick="cerrarModal()">
+                        ← Volver
+                    </button>
+                </div>
+            `;
+            
+            // Mostrar en modal mejorado
+            document.body.innerHTML += `
+                <div id="verSesionModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000; display: flex; justify-content: center; align-items: center; padding: 20px;">
+                    <div class="modal-content">
+                        ${contenido}
+                    </div>
+                </div>
+            `;
+            
+        } else {
+            alert('Error cargando la sesión');
+        }
         
     } catch (error) {
         console.error('Error:', error);
-        alert('Error de conexión al generar el reporte');
-        
-        // Restaurar botón en caso de error
-        const button = event.target;
-        button.innerHTML = '📄 Descargar PDF';
-        button.disabled = false;
+        alert('Error de conexión');
     }
+}
+
+// Cerrar modal
+function cerrarModal() {
+    const modal = document.getElementById('verSesionModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// Descargar reporte (versión para paciente)
+async function descargarReportePaciente(sesionId, nombreSesion) {
+    // Usar la misma función que los terapeutas
+    await descargarReporte(sesionId, nombreSesion);
+}
+
+// Mostrar mensaje temporal
+function mostrarMensaje(texto, tipo = 'success') {
+    const mensaje = document.createElement('div');
+    mensaje.className = tipo === 'success' ? 'success-message' : 'error-message';
+    mensaje.textContent = texto;
+    mensaje.style.position = 'fixed';
+    mensaje.style.top = '20px';
+    mensaje.style.right = '20px';
+    mensaje.style.zIndex = '9999';
+    mensaje.style.minWidth = '300px';
+    
+    document.body.appendChild(mensaje);
+    
+    setTimeout(() => {
+        mensaje.remove();
+    }, 3000);
 }

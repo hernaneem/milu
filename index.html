@@ -240,10 +240,21 @@
 
     <!-- Dashboard Paciente -->
     <div id="dashboardPaciente" class="screen">
-        <h2>Panel de Paciente</h2>
+        <h2>Mi Panel de Paciente</h2>
         <p id="bienvenidaPaciente"></p>
         
-        <p>Espera a que tu terapeuta inicie la sesión.</p>
+        <div style="margin: 20px 0;">
+            <h3>Mi Información</h3>
+            <div id="infoPaciente" style="background-color: #f8f9fa; padding: 15px; border-radius: 5px;">
+                Cargando información...
+            </div>
+        </div>
+        
+        <div style="margin: 20px 0;">
+            <h3>Mis Sesiones de Terapia</h3>
+            <div id="sesionesPaciente">Cargando sesiones...</div>
+        </div>
+        
         <button onclick="logout()">Cerrar Sesión</button>
     </div>
 

@@ -295,11 +295,25 @@ async function cargarSesionesTerapeuta() {
             listaSesiones.innerHTML = '<p>No has creado sesiones aún.</p>';
         } else {
             listaSesiones.innerHTML = sesiones.map(s => 
-                `<div style="padding: 10px; border: 1px solid #ddd; margin: 5px 0; border-radius: 5px;">
-                    <strong>${s.nombre}</strong> - ${s.estado}<br>
-                    Creada: ${new Date(s.fechaCreacion).toLocaleDateString()}<br>
-                    Transcripciones: ${s.transcripciones.length}<br>
-                    <button class="primary" onclick="abrirSesion('${s.id}')">Abrir Sesión</button>
+                `<div style="padding: 15px; border: 1px solid #ddd; margin: 10px 0; border-radius: 8px; background-color: #f9f9f9;">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div>
+                            <strong style="font-size: 16px;">${s.nombre}</strong> 
+                            <span style="background-color: ${s.estado === 'activa' ? '#28a745' : '#6c757d'}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 10px;">
+                                ${s.estado}
+                            </span><br>
+                            <small style="color: #666;">Creada: ${new Date(s.fechaCreacion).toLocaleDateString()}</small><br>
+                            <small style="color: #666;">Transcripciones: ${s.transcripciones.length}</small>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 5px;">
+                            <button class="primary" onclick="abrirSesion('${s.id}')" style="font-size: 12px; padding: 5px 10px;">
+                                Abrir Sesión
+                            </button>
+                            <button class="success" onclick="descargarReporte('${s.id}', '${s.nombre}', event)" style="font-size: 12px; padding: 5px 10px;">
+                                📄 Descargar PDF
+                            </button>
+                        </div>
+                    </div>
                 </div>`
             ).join('');
         }
@@ -530,5 +544,55 @@ async function finalizarSesion() {
         } catch (error) {
             console.error('Error:', error);
         }
+    }
+}
+
+// Descargar reporte PDF
+async function descargarReporte(sesionId, nombreSesion, event) {
+    try {
+        // Mostrar indicador de carga
+        const button = event.target;
+        const textoOriginal = button.innerHTML;
+        button.innerHTML = '⏳ Generando...';
+        button.disabled = true;
+        
+        const response = await fetch(`http://localhost:3001/generar-reporte/${sesionId}`);
+        
+        if (response.ok) {
+            // Crear blob del PDF
+            const blob = await response.blob();
+            
+            // Crear enlace de descarga
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `reporte-${nombreSesion.replace(/\s+/g, '-')}.pdf`;
+            
+            // Agregar al DOM, hacer clic y remover
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
+            // Mostrar mensaje de éxito
+            alert('Reporte descargado exitosamente!');
+            
+        } else {
+            alert('Error al generar el reporte');
+        }
+        
+        // Restaurar botón
+        button.innerHTML = textoOriginal;
+        button.disabled = false;
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error de conexión al generar el reporte');
+        
+        // Restaurar botón en caso de error
+        const button = event.target;
+        button.innerHTML = '📄 Descargar PDF';
+        button.disabled = false;
     }
 }

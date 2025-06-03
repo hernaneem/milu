@@ -1,0 +1,13 @@
+[
+  {
+    "id": "1748912079497",
+    "nombre": "Herna",
+    "apellido": "Echeverria",
+    "correo": "hernan@paciente.com",
+    "telefono": "5567870041",
+    "edad": "29",
+    "genero": "masculino",
+    "terapeutaId": "1748911055480",
+    "fechaRegistro": "2025-06-03T00:54:39.497Z"
+  }
+]

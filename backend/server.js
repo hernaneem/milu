@@ -9,6 +9,8 @@ const path = require('path');
 const app = express();
 const port = 3001;
 
+const { jsPDF } = require('jspdf');
+
 app.use(cors());
 app.use(express.json());
 
@@ -230,6 +232,91 @@ app.get('/sesion/:sesionId', (req, res) => {
     }
     
     res.json(sesion);
+});
+
+// Generar reporte PDF de sesión
+app.get('/generar-reporte/:sesionId', async (req, res) => {
+    try {
+        const { sesionId } = req.params;
+        const sesiones = leerDatos(sesionesFile);
+        const sesion = sesiones.find(s => s.id === sesionId);
+        
+        if (!sesion) {
+            return res.status(404).json({ error: 'Sesión no encontrada' });
+        }
+        
+        // Buscar información del terapeuta y paciente
+        const terapeutas = leerDatos(terapeutasFile);
+        const pacientes = leerDatos(pacientesFile);
+        
+        const terapeuta = terapeutas.find(t => t.id === sesion.terapeutaId);
+        const paciente = pacientes.find(p => p.id === sesion.pacienteId);
+        
+        // Crear PDF
+        const doc = new jsPDF();
+        
+        // Título
+        doc.setFontSize(20);
+        doc.text('REPORTE DE SESIÓN TERAPÉUTICA', 20, 30);
+        
+        // Información de la sesión
+        doc.setFontSize(12);
+        doc.text(`Nombre de la sesión: ${sesion.nombre}`, 20, 50);
+        doc.text(`Fecha: ${new Date(sesion.fechaCreacion).toLocaleDateString()}`, 20, 60);
+        doc.text(`Estado: ${sesion.estado}`, 20, 70);
+        
+        // Información del terapeuta
+        if (terapeuta) {
+            doc.text(`Terapeuta: ${terapeuta.nombre} ${terapeuta.apellido}`, 20, 90);
+            doc.text(`Email: ${terapeuta.correo}`, 20, 100);
+        }
+        
+        // Información del paciente
+        if (paciente) {
+            doc.text(`Paciente: ${paciente.nombre} ${paciente.apellido}`, 20, 120);
+            doc.text(`Edad: ${paciente.edad} años`, 20, 130);
+            doc.text(`Género: ${paciente.genero}`, 20, 140);
+        }
+        
+        // Transcripciones
+        doc.text('TRANSCRIPCIONES:', 20, 160);
+        
+        let yPosition = 170;
+        
+        if (sesion.transcripciones.length === 0) {
+            doc.text('No hay transcripciones en esta sesión.', 20, yPosition);
+        } else {
+            sesion.transcripciones.forEach((transcripcion, index) => {
+                const timestamp = new Date(transcripcion.timestamp).toLocaleTimeString();
+                
+                // Verificar si necesitamos una nueva página
+                if (yPosition > 270) {
+                    doc.addPage();
+                    yPosition = 30;
+                }
+                
+                doc.setFontSize(10);
+                doc.text(`[${timestamp}]`, 20, yPosition);
+                yPosition += 10;
+                
+                // Dividir texto largo en múltiples líneas
+                const lineas = doc.splitTextToSize(transcripcion.texto, 170);
+                doc.text(lineas, 20, yPosition);
+                yPosition += lineas.length * 5 + 10;
+            });
+        }
+        
+        // Convertir a buffer y enviar
+        const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
+        
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="reporte-${sesion.nombre.replace(/\s+/g, '-')}.pdf"`);
+        res.send(pdfBuffer);
+        
+    } catch (error) {
+        console.error('Error generando PDF:', error);
+        res.status(500).json({ error: 'Error generando el reporte' });
+    }
 });
 
 app.listen(port, () => {

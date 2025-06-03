@@ -1,0 +1,27 @@
+[
+  {
+    "id": "1748913035639",
+    "terapeutaId": "1748911055480",
+    "pacienteId": "1748912079497",
+    "nombre": "Sesion prueba",
+    "fechaCreacion": "2025-06-03T01:10:35.639Z",
+    "estado": "activa",
+    "transcripciones": [
+      {
+        "id": "1748913645818",
+        "texto": "hola buenas tardes cómo estamos todos por aquí estamos probando",
+        "timestamp": "2025-06-03T01:20:45.815Z"
+      },
+      {
+        "id": "1748913665327",
+        "texto": "Este es la segunda prueba para revisar que realmente se esté grabando y se estén guardando los cambios.",
+        "timestamp": "2025-06-03T01:21:05.324Z"
+      },
+      {
+        "id": "1748916230473",
+        "texto": "Estoy grabando esto para probar si vuelve a funcionar.",
+        "timestamp": "2025-06-03T02:03:50.472Z"
+      }
+    ]
+  }
+]

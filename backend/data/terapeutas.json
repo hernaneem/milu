@@ -1,0 +1,16 @@
+[
+  {
+    "id": "1748911055480",
+    "nombre": "Hernan",
+    "apellido": "Terapia",
+    "correo": "hernan@terapia.com",
+    "telefono": "5567870041",
+    "tiposTerapia": [
+      "cognitivo-conductual",
+      "psicoanalisis",
+      "humanista",
+      "pareja"
+    ],
+    "fechaRegistro": "2025-06-03T00:37:35.480Z"
+  }
+]

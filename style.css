@@ -1,0 +1,151 @@
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f4f4;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.screen {
+    display: none;
+}
+
+.screen.active {
+    display: block;
+}
+
+h1, h2, h3 {
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 5px 5px 5px 0;
+    font-size: 14px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+button:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+.primary {
+    background-color: #007bff;
+}
+
+.primary:hover {
+    background-color: #0056b3;
+}
+
+.success {
+    background-color: #28a745;
+}
+
+.success:hover {
+    background-color: #218838;
+}
+
+.secondary {
+    background-color: #6c757d;
+}
+
+.secondary:hover {
+    background-color: #545b62;
+}
+
+.error {
+    color: #dc3545;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.success-msg {
+    color: #28a745;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+#transcription {
+    border: 1px solid #ddd;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    min-height: 100px;
+}
+
+#status {
+    margin: 10px 0;
+    padding: 10px;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    text-align: center;
+}
+
+/* Estilos para botones pequeños */
+.primary, .success, .secondary {
+    min-width: 80px;
+    text-align: center;
+}
+
+.primary:disabled, .success:disabled, .secondary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Mejorar espaciado de las sesiones */
+.session-card {
+    transition: box-shadow 0.2s ease;
+}
+
+.session-card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Responsive para botones */
+@media (max-width: 600px) {
+    .session-card div:last-child {
+        flex-direction: row !important;
+        gap: 10px !important;
+    }
+    
+    .session-card button {
+        font-size: 10px !important;
+        padding: 4px 8px !important;
+    }
+}

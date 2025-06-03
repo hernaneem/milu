@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Milu - AI Note Taker</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            max-width: 800px; 
+            margin: 0 auto;
+        }
+        button { 
+            padding: 10px 20px; 
+            margin: 10px 5px; 
+            font-size: 16px; 
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .primary { background-color: #007bff; color: white; }
+        .secondary { background-color: #6c757d; color: white; }
+        .success { background-color: #28a745; color: white; }
+        
+        .screen { display: none; }
+        .screen.active { display: block; }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .error {
+            color: red;
+            margin-top: 5px;
+        }
+        
+        .success-msg {
+            color: green;
+            margin-top: 5px;
+        }
+        
+        #transcription { 
+            margin-top: 20px; 
+            padding: 15px; 
+            border: 1px solid #ccc; 
+            background-color: #f9f9f9;
+            min-height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Pantalla inicial -->
+    <div id="inicio" class="screen active">
+        <h1>Milu - AI Note Taker</h1>
+        <p>Sistema de transcripción automática para sesiones de terapia</p>
+        
+        <button class="primary" onclick="mostrarPantalla('loginTerapeuta')">Soy Terapeuta</button>
+        <button class="secondary" onclick="mostrarPantalla('loginPaciente')">Soy Paciente</button>
+    </div>
+
+    <!-- Login Terapeuta -->
+    <div id="loginTerapeuta" class="screen">
+        <h2>Acceso para Terapeutas</h2>
+        
+        <div class="form-group">
+            <label>Correo electrónico:</label>
+            <input type="email" id="correoTerapeuta" placeholder="tu@email.com">
+        </div>
+        
+        <button class="primary" onclick="loginTerapeuta()">Iniciar Sesión</button>
+        <button class="secondary" onclick="mostrarPantalla('registroTerapeuta')">Registrarme</button>
+        <button onclick="mostrarPantalla('inicio')">Volver</button>
+        
+        <div id="errorLoginTerapeuta" class="error"></div>
+    </div>
+
+    <!-- Registro Terapeuta -->
+    <div id="registroTerapeuta" class="screen">
+        <h2>Registro de Terapeuta</h2>
+        
+        <div class="form-group">
+            <label>Nombre:</label>
+            <input type="text" id="nombreTerapeuta" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Apellido:</label>
+            <input type="text" id="apellidoTerapeuta" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Correo electrónico:</label>
+            <input type="email" id="correoRegistroTerapeuta" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Teléfono:</label>
+            <input type="tel" id="telefonoTerapeuta" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Tipos de terapia que ofreces:</label>
+            <select id="tiposTerapia" multiple>
+                <option value="cognitivo-conductual">Cognitivo-Conductual</option>
+                <option value="psicoanalisis">Psicoanálisis</option>
+                <option value="humanista">Humanista</option>
+                <option value="familiar">Terapia Familiar</option>
+                <option value="pareja">Terapia de Pareja</option>
+                <option value="infantil">Terapia Infantil</option>
+            </select>
+            <small>Mantén presionado Cmd para seleccionar múltiples opciones</small>
+        </div>
+        
+        <button class="success" onclick="registrarTerapeuta()">Registrarme</button>
+        <button onclick="mostrarPantalla('loginTerapeuta')">Volver al Login</button>
+        
+        <div id="errorRegistroTerapeuta" class="error"></div>
+        <div id="successRegistroTerapeuta" class="success-msg"></div>
+    </div>
+
+    <!-- Login Paciente -->
+    <div id="loginPaciente" class="screen">
+        <h2>Acceso para Pacientes</h2>
+        
+        <div class="form-group">
+            <label>Correo electrónico:</label>
+            <input type="email" id="correoPaciente" placeholder="tu@email.com">
+        </div>
+        
+        <button class="primary" onclick="loginPaciente()">Iniciar Sesión</button>
+        <button class="secondary" onclick="mostrarPantalla('registroPaciente')">Registrarme</button>
+        <button onclick="mostrarPantalla('inicio')">Volver</button>
+        
+        <div id="errorLoginPaciente" class="error"></div>
+    </div>
+
+    <!-- Registro Paciente -->
+    <div id="registroPaciente" class="screen">
+        <h2>Registro de Paciente</h2>
+        
+        <div class="form-group">
+            <label>Nombre:</label>
+            <input type="text" id="nombrePaciente" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Apellido:</label>
+            <input type="text" id="apellidoPaciente" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Correo electrónico:</label>
+            <input type="email" id="correoRegistroPaciente" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Teléfono:</label>
+            <input type="tel" id="telefonoPaciente" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Edad:</label>
+            <input type="number" id="edadPaciente" min="1" max="120" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Género:</label>
+            <select id="generoPaciente" required>
+                <option value="">Seleccionar...</option>
+                <option value="masculino">Masculino</option>
+                <option value="femenino">Femenino</option>
+                <option value="no-binario">No binario</option>
+                <option value="prefiero-no-decir">Prefiero no decir</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Correo del terapeuta asignado:</label>
+            <input type="email" id="correoTerapeutaAsignado" required>
+            <small>Introduce el correo del terapeuta que te asignó</small>
+        </div>
+        
+        <button class="success" onclick="registrarPaciente()">Registrarme</button>
+        <button onclick="mostrarPantalla('loginPaciente')">Volver al Login</button>
+        
+        <div id="errorRegistroPaciente" class="error"></div>
+        <div id="successRegistroPaciente" class="success-msg"></div>
+    </div>
+
+    <!-- Dashboard Terapeuta -->
+    <div id="dashboardTerapeuta" class="screen">
+        <h2>Panel de Terapeuta</h2>
+        <p id="bienvenidaTerapeuta"></p>
+        
+        <div style="margin: 20px 0;">
+            <h3>Mis Pacientes</h3>
+            <div id="listaPacientes">Cargando pacientes...</div>
+        </div>
+        
+        <div style="margin: 20px 0;">
+            <h3>Crear Nueva Sesión</h3>
+            <div class="form-group">
+                <label>Seleccionar paciente:</label>
+                <select id="pacienteParaSesion">
+                    <option value="">Seleccionar paciente...</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Nombre de la sesión:</label>
+                <input type="text" id="nombreSesion" placeholder="Ej: Sesión inicial, Seguimiento semanal...">
+            </div>
+            
+            <button class="success" onclick="crearSesion()">Crear Sesión</button>
+            <div id="errorCrearSesion" class="error"></div>
+            <div id="successCrearSesion" class="success-msg"></div>
+        </div>
+        
+        <div style="margin: 20px 0;">
+            <h3>Mis Sesiones</h3>
+            <div id="listaSesiones">Cargando sesiones...</div>
+        </div>
+        
+        <button onclick="logout()">Cerrar Sesión</button>
+    </div>
+
+    <!-- Dashboard Paciente -->
+    <div id="dashboardPaciente" class="screen">
+        <h2>Panel de Paciente</h2>
+        <p id="bienvenidaPaciente"></p>
+        
+        <p>Espera a que tu terapeuta inicie la sesión.</p>
+        <button onclick="logout()">Cerrar Sesión</button>
+    </div>
+
+    <!-- Pantalla de grabación -->
+    <div id="grabacion" class="screen">
+        <div id="infoSesion" style="background-color: #f0f8ff; padding: 15px; margin-bottom: 20px; border-radius: 5px;">
+            <h3>Sesión en Curso</h3>
+            <p id="nombreSesionActual">Cargando información de sesión...</p>
+        </div>
+        
+        <button id="startRecord" class="success">Iniciar Grabación</button>
+        <button id="stopRecord" class="secondary" disabled>Detener Grabación</button>
+        <div id="status">Listo para grabar</div>
+        
+        <h3>Transcripción de la Sesión:</h3>
+        <div id="transcription" style="max-height: 300px; overflow-y: auto;">
+            La transcripción aparecerá aquí...
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <button class="success" onclick="finalizarSesion()">Finalizar Sesión</button>
+            <button onclick="mostrarPantalla('dashboardTerapeuta')">Volver sin Finalizar</button>
+        </div>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+</html>
